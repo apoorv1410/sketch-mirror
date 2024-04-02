@@ -96,22 +96,35 @@ const drawingApp = {
 
     setupSocketListeners: function() {
         this.socket.on("beginPath", (data) => {
-            this.beginPath(data);
+            // only trigger socket events from different socket
+            if (this.socket.id != data.sender) {
+                this.beginPath(data);
+            }
         });
         this.socket.on("drawStroke", (data) => {
-            this.drawStroke(data);
+            // only trigger socket events from different socket
+            if (this.socket.id != data.sender) {
+                this.drawStroke(data);
+            }
         });
         this.socket.on("redoUndo", (data) => {
-            this.undoRedoCanvas(data);
+            // only trigger socket events from different socket
+            if (this.socket.id != data.sender) {
+                this.undoRedoCanvas(data.source);
+            }
         });
         this.socket.on("updateCanvasTracker", (data) => {
-            this.updateCanvasTracker(data);
+            // only trigger socket events from different socket
+            if (this.socket.id != data.sender) {
+                this.updateCanvasTracker(data);
+            }
         });
     },
 
     handleMouseDown: function(e) {
         this.mouseDown = true;
         var data = {
+            sender: this.socket.id,
             x: e.clientX,
             y: e.clientY
         };
@@ -122,6 +135,7 @@ const drawingApp = {
     handleMouseMove: function(e) {
         if (this.mouseDown) {
             var data = {
+                sender: this.socket.id,
                 x: e.clientX,
                 y: e.clientY,
                 color: eraserFlag ? this.eraserColor : this.penColor,
@@ -143,6 +157,7 @@ const drawingApp = {
         }
         this.track = this.undoRedoTracker.length - 1;
         let updatedData = {
+            sender: this.socket.id,
             updatedUndoRedoTracker: this.undoRedoTracker,
             updatedTrack: this.track
         };
@@ -166,7 +181,11 @@ const drawingApp = {
         if (this.track > 0) {
             this.track--;
             this.undoRedoCanvas(this.undoRedoTracker[this.track]);
-            this.socket.emit("redoUndo", this.undoRedoTracker[this.track]);
+            let updatedData = {
+                sender: this.socket.id,
+                source: this.undoRedoTracker[this.track]
+            };
+            this.socket.emit("redoUndo", updatedData);
         } else if (this.track === 0) {
             this.track--;
             this.clearCanvas(this.tool);
@@ -177,7 +196,11 @@ const drawingApp = {
         if (this.track < (this.undoRedoTracker.length - 1)) {
             this.track++;
             this.undoRedoCanvas(this.undoRedoTracker[this.track]);
-            this.socket.emit("redoUndo", this.undoRedoTracker[this.track]);
+            let updatedData = {
+                sender: this.socket.id,
+                source: this.undoRedoTracker[this.track]
+            };
+            this.socket.emit("redoUndo", updatedData);
         }
     },
 
