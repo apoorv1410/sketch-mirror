@@ -1,4 +1,4 @@
-let socket = io.connect("http://localhost:" + (process.env.PORT || 5500));
+let socket = io.connect("http://localhost:" + 5500);
 
 let canvas = document.querySelector("canvas");
 // set canvas size as full window
