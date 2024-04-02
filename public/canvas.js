@@ -1,232 +1,245 @@
-// import app_url from '../config/config.js'
-let socket = io.connect(app_url);
+const drawingApp = {
+    socket: io.connect(app_url),
+    canvas: document.querySelector("canvas"),
+    tool: null,
+    mouseDown: false,
+    penColor: "black",
+    previousPenColor: "black",
+    penWidth: 2,
+    eraserWidth: 5,
+    eraserColor: "white",
+    undoRedoTracker: [],
+    track: 0,
+    undoLimit: 1000,
+    pencilWidthElem: document.querySelector(".pencil-width"),
+    eraserWidthElem: document.querySelector(".eraser-width"),
+    pencilCursor: "url('https://img.icons8.com/stickers/28/pencil-tip.png') -28 28, auto",
+    eraserCursor: "url('https://img.icons8.com/papercut/28/eraser.png') -28 28, auto",
 
-let canvas = document.querySelector("canvas");
-// set canvas size as full window
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-let pencilCursor = "url('https://img.icons8.com/stickers/28/pencil-tip.png') -28 28, auto"
-let eraserCursor = "url('https://img.icons8.com/papercut/28/eraser.png'), auto"
-canvas.style.cursor = pencilCursor 
+    init: function() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+        this.tool = this.canvas.getContext("2d");
+        this.setupEventListeners();
+        this.setupSocketListeners();
+        this.setPencilCursor();
 
-let pencilColorTiles = document.querySelectorAll(".pencil-color-tile");
-let pencilWidthElem = document.querySelector(".pencil-width");
-let eraserWidthElem = document.querySelector(".eraser-width");
-let download = document.querySelector(".download");
-let redo = document.querySelector(".redo");
-let undo = document.querySelector(".undo");
+        // set initial color background
+        this.updateBackgroundFromClass('.' + this.penColor + '-parent', 'white');
+    },
 
-let penColor = "black";
-let previousPenColor = "black";
-// initialize background color for pen color
-updateBackgroundFromClass('.' + penColor + '-parent', 'white')
+    setupEventListeners: function() {
+        this.canvas.addEventListener("mousedown", this.handleMouseDown.bind(this));
+        this.canvas.addEventListener("mousemove", this.handleMouseMove.bind(this));
+        this.canvas.addEventListener("mouseup", this.handleMouseUp.bind(this));
+        document.querySelector(".undo").addEventListener("click", this.handleUndo.bind(this));
+        document.querySelector(".redo").addEventListener("click", this.handleRedo.bind(this));
+        document.querySelector(".download").addEventListener("click", this.handleDownload.bind(this));
+        let pencilColorTiles = document.querySelectorAll(".pencil-color-tile");
+        pencilColorTiles.forEach((colorElem) => {
+            colorElem.addEventListener("click", () => {
+                let selectedColor = colorElem.id;
+                this.penColor = selectedColor;
+                this.tool.strokeStyle = this.penColor;
+                this.canvas.style.cursor = this.pencilCursor;
+                this.updateBackgroundFromClass('.' + this.previousPenColor + '-parent', 'inherit');
+                this.updateBackgroundFromClass('.' + selectedColor + '-parent', 'white');
+                this.previousPenColor = selectedColor;
+            });
+        });
 
-const eraserColor = "white";
-let penWidth = pencilWidthElem.value;
-let eraserWidth = eraserWidthElem.value;
+        this.pencilWidthElem.addEventListener("change", (e) => {
+            this.penWidth = this.pencilWidthElem.value;
+            this.tool.lineWidth = this.penWidth;
+        });
+        
+        this.eraserWidthElem.addEventListener("change", (e) => {
+            this.eraserWidth = this.eraserWidthElem.value;
+            this.tool.lineWidth = this.eraserWidth;
+        });
+        
+        eraser.addEventListener("click", () => {
+            eraserFlag = !eraserFlag
+            if (eraserFlag) {
+                this.tool.strokeStyle = this.eraserColor;
+                this.tool.lineWidth = this.eraserWidth;
+                this.canvas.style.cursor = this.eraserCursor;
 
-let undoRedoTracker = []; //Data
-let track = 0; // index of latest canvas in undoRedoTracker
+                // update eraser tool style
+                eraserToolCont.style.display = 'flex'
+                pencilToolCont.style.display = "none";
+                eraser.style.backgound = "gold";
+            } else {
+                this.tool.strokeStyle = this.penColor;
+                this.tool.lineWidth = this.penWidth;
+                this.canvas.style.cursor = this.pencilCursor;
+                eraserToolCont.style.display = 'none'
+            }
+        });
 
-let mouseDown = false;
+        // function to handle show/hide for pencil and eraser options on pencil click
+        pencil.addEventListener('click', () => {
+            pencilFlag = !pencilFlag
+            if (pencilFlag) {
+                pencilToolCont.style.display = "block";
+                pencil.style.backgound = "gold";
+                eraserToolCont.style.display = 'none'
+                eraserFlag = false
+                // set pencil cursor
+                this.canvas.style.cursor = this.pencilCursor 
+            }
+            else {
+                pencilToolCont.style.display = "none";
+            }
+        })
+    },
 
-// API to perform graphic
-let tool = canvas.getContext("2d");
+    setupSocketListeners: function() {
+        this.socket.on("beginPath", (data) => {
+            this.beginPath(data);
+        });
+        this.socket.on("drawStroke", (data) => {
+            this.drawStroke(data);
+        });
+        this.socket.on("redoUndo", (data) => {
+            this.undoRedoCanvas(data);
+        });
+        this.socket.on("updateCanvasTracker", (data) => {
+            this.updateCanvasTracker(data);
+        });
+    },
 
-tool.strokeStyle = penColor;
-tool.lineWidth = penWidth;
-
-// mousedown -> start new path
-canvas.addEventListener("mousedown", (e) => {
-    mouseDown = true;
-    var data = {
-        x: e.clientX,
-        y: e.clientY
-    }
-    // send data to server
-    socket.emit("beginPath", data);
-})
-// mousemove -> path fill (graphics)
-canvas.addEventListener("mousemove", (e) => {
-    if (mouseDown) {
+    handleMouseDown: function(e) {
+        this.mouseDown = true;
         var data = {
             x: e.clientX,
-            y: e.clientY,
-            color: eraserFlag ? eraserColor : penColor,
-            width: eraserFlag ? eraserWidth : penWidth
+            y: e.clientY
+        };
+        this.beginPath(data);
+        this.socket.emit("beginPath", data);
+    },
+
+    handleMouseMove: function(e) {
+        if (this.mouseDown) {
+            var data = {
+                x: e.clientX,
+                y: e.clientY,
+                color: eraserFlag ? this.eraserColor : this.penColor,
+                width: eraserFlag ? this.eraserWidth : this.penWidth
+            };
+            this.drawStroke(data);
+            this.socket.emit("drawStroke", data);
         }
-        drawStroke(data)
-        socket.emit("drawStroke", data);
-    }
-})
-// set the undo history limit to constrol the updatedUndoRedoTracker array size
-let undoLimit = 1000
-canvas.addEventListener("mouseup", () => {
-    mouseDown = false;
-    undoRedoTracker = undoRedoTracker.slice(0, track+1)
-    
-    let destinationCanvas = getCanvasCopyWithWhiteBackground(canvas);
-    let url = destinationCanvas.toDataURL();
-    undoRedoTracker.push(url);
+    },
 
-    if (undoRedoTracker.length > undoLimit) {
-        undoRedoTracker = undoRedoTracker.slice(undoRedoTracker.length - undoLimit)
-    }
-    track = undoRedoTracker.length - 1
-    let updatedData = {
-        updatedUndoRedoTracker: undoRedoTracker,
-        updatedTrack: track
-    }
-    updateCanvasTracker(updatedData)
-    socket.emit("updateCanvasTracker", updatedData);
-})
+    handleMouseUp: function() {
+        this.mouseDown = false;
+        this.undoRedoTracker = this.undoRedoTracker.slice(0, this.track + 1);
+        let destinationCanvas = this.getCanvasCopyWithWhiteBackground();
+        let url = destinationCanvas.toDataURL();
+        this.undoRedoTracker.push(url);
+        if (this.undoRedoTracker.length > this.undoLimit) {
+            this.undoRedoTracker = this.undoRedoTracker.slice(this.undoRedoTracker.length - this.undoLimit);
+        }
+        this.track = this.undoRedoTracker.length - 1;
+        let updatedData = {
+            updatedUndoRedoTracker: this.undoRedoTracker,
+            updatedTrack: this.track
+        };
+        this.updateCanvasTracker(updatedData);
+        this.socket.emit("updateCanvasTracker", updatedData);
+    },
 
-function updateCanvasTracker (updatedData) {
-    undoRedoTracker = updatedData.updatedUndoRedoTracker
-    track = updatedData.updatedTrack
-}
-
-undo.addEventListener("click", () => {
-    if (track > 0) {
-        track--;
-        undoRedoCanvas(undoRedoTracker[track])
-        socket.emit("redoUndo", undoRedoTracker[track]);
-    } else if (track === 0) {
-        track--;
-        clearCanvas(tool)
-    }
-})
-redo.addEventListener("click", () => {
-    if (track < (undoRedoTracker.length - 1)) {
-        track++;
-        undoRedoCanvas(undoRedoTracker[track])
-        socket.emit("redoUndo", undoRedoTracker[track]);
-    }
-})
-
-function undoRedoCanvas(image) {
-    let img = new Image(); // new image reference element
-    img.src = image;
-    img.onload = () => {
-        tool.drawImage(img, 0, 0, canvas.width, canvas.height);
-    }
-}
-
-function clearCanvas (context) {
+    clearCanvas: function (context) {
         // Store the current transformation matrix
-    context.save();
+        context.save();
 
-    // Use the identity matrix while clearing the canvas
-    context.setTransform(1, 0, 0, 1, 0, 0);
-    context.clearRect(0, 0, canvas.width, canvas.height);
+        // Use the identity matrix while clearing the canvas
+        context.setTransform(1, 0, 0, 1, 0, 0);
+        context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // Restore the transform
-    context.restore();
-}
+        // Restore the transform
+        context.restore();
+    },
 
-// start new graphic and new start point
-function beginPath(strokeObj) {
-    tool.beginPath();
-    tool.moveTo(strokeObj.x, strokeObj.y);
-}
+    handleUndo: function() {
+        if (this.track > 0) {
+            this.track--;
+            this.undoRedoCanvas(this.undoRedoTracker[this.track]);
+            this.socket.emit("redoUndo", this.undoRedoTracker[this.track]);
+        } else if (this.track === 0) {
+            this.track--;
+            this.clearCanvas(this.tool);
+        }
+    },
 
-// draw path to destination position with selected style
-function drawStroke(strokeObj) {
-    tool.strokeStyle = strokeObj.color;
-    tool.lineWidth = strokeObj.width;
-    tool.lineTo(strokeObj.x, strokeObj.y);
-    tool.stroke();
-}
+    handleRedo: function() {
+        if (this.track < (this.undoRedoTracker.length - 1)) {
+            this.track++;
+            this.undoRedoCanvas(this.undoRedoTracker[this.track]);
+            this.socket.emit("redoUndo", this.undoRedoTracker[this.track]);
+        }
+    },
 
-function getCanvasCopyWithWhiteBackground () {
-    // create temporary canvas element
-    let destinationCanvas = document.createElement("canvas");
-    destinationCanvas.width = canvas.width;
-    destinationCanvas.height = canvas.height;
+    handleDownload: function() {
+        let canvasScreenShotWithWhiteBackground = this.getCanvasCopyWithWhiteBackground();
+        let url = canvasScreenShotWithWhiteBackground.toDataURL();
+        let a = document.createElement("a");
+        a.href = url;
+        a.download = "board-" + new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString() + ".jpg";
+        a.click();
+    },
 
-    let destCtx = destinationCanvas.getContext("2d");
+    setPencilCursor: function() {
+        this.canvas.style.cursor = this.pencilCursor;
+    },
 
-    //create a rectangle with the desired color
-    destCtx.fillStyle = "#fff";
-    destCtx.fillRect(0,0,canvas.width,canvas.height);
+    updateBackgroundFromClass: function(className, color) {
+        let colorElement = document.querySelector(className)
+        if (colorElement) {
+            colorElement.style.background = color;
+        }
+    },
 
-    //draw the original canvas onto the destination canvas
-    destCtx.drawImage(canvas, 0, 0);
+    beginPath: function(strokeObj) {
+        this.tool.beginPath();
+        this.tool.moveTo(strokeObj.x, strokeObj.y);
+    },
 
-    //finally use the destinationCanvas.toDataURL() method to get the desired output;
-    return destinationCanvas;
-}
+    drawStroke: function(strokeObj) {
+        this.tool.strokeStyle = strokeObj.color;
+        this.tool.lineWidth = strokeObj.width;
+        this.tool.lineTo(strokeObj.x, strokeObj.y);
+        this.tool.stroke();
+    },
 
-pencilColorTiles.forEach((colorElem) => {
-    colorElem.addEventListener("click", () => {
-        let selectedColor = colorElem.id;
-        penColor = selectedColor;
-        tool.strokeStyle = penColor;
-        canvas.style.cursor = pencilCursor
-        
-        // remove background from previous pen color
-        updateBackgroundFromClass('.' + previousPenColor + '-parent', 'inherit')
+    undoRedoCanvas: function(image) {
+        let img = new Image();
+        img.src = image;
+        img.onload = () => {
+            this.tool.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
+        };
+    },
 
-        // add background to selected pen color
-        updateBackgroundFromClass('.' + selectedColor + '-parent', 'white')
+    getCanvasCopyWithWhiteBackground: function() {
+        let destinationCanvas = document.createElement("canvas");
+        destinationCanvas.width = this.canvas.width;
+        destinationCanvas.height = this.canvas.height;
 
-        // update previous pen color
-        previousPenColor = selectedColor
-    })
-})
+        let destCtx = destinationCanvas.getContext("2d");
 
-function updateBackgroundFromClass (className, color) {
-    let colorElement = document.querySelector(className)
-    if (colorElement) {
-        colorElement.style.background = color;
+        destCtx.fillStyle = "#fff";
+        destCtx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        destCtx.drawImage(this.canvas, 0, 0);
+
+        return destinationCanvas;
+    },
+
+    updateCanvasTracker: function(updatedData) {
+        this.undoRedoTracker = updatedData.updatedUndoRedoTracker;
+        this.track = updatedData.updatedTrack;
     }
-}
+};
 
-// reset selected color background
-
-pencilWidthElem.addEventListener("change", (e) => {
-    penWidth = pencilWidthElem.value;
-    tool.lineWidth = penWidth;
-})
-eraserWidthElem.addEventListener("change", (e) => {
-    eraserWidth = eraserWidthElem.value;
-    tool.lineWidth = eraserWidth;
-})
-eraser.addEventListener("click", () => {
-    if (eraserFlag) {
-        tool.strokeStyle = eraserColor;
-        tool.lineWidth = eraserWidth;
-        // set eraser cursor
-        canvas.style.cursor = eraserCursor 
-    } else {
-        tool.strokeStyle = penColor;
-        tool.lineWidth = penWidth;
-        // set pencil cursor
-        canvas.style.cursor = pencilCursor 
-    }
-})
-
-download.addEventListener("click", () => {
-    let canvasScreenShotWithWhiteBackground = getCanvasCopyWithWhiteBackground(canvas)
-    url = canvasScreenShotWithWhiteBackground.toDataURL();
-
-    let a = document.createElement("a");
-    a.href = url;
-    a.download = "board-" + new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString() +".jpg";
-    a.click();
-})
-
-
-socket.on("beginPath", (data) => {
-    // data -> data from server
-    beginPath(data);
-})
-socket.on("drawStroke", (data) => {
-    drawStroke(data);
-})
-socket.on("redoUndo", (data) => {
-    undoRedoCanvas(data);
-})
-socket.on("updateCanvasTracker", (data) => {
-    updateCanvasTracker(data);
-})
+drawingApp.init();

@@ -36,31 +36,3 @@ function closeTools() {
     pencilToolCont.style.display = 'none'
     eraserToolCont.style.display = 'none'
 }
-
-// function to handle show/hide for pencil and eraser options on pencil click
-pencil.addEventListener('click', () => {
-    pencilFlag = !pencilFlag
-    if (pencilFlag) {
-        pencilToolCont.style.display = "block";
-        pencil.style.backgound = "gold";
-        eraserToolCont.style.display = 'none'
-        eraserFlag = false
-        // set pencil cursor
-        canvas.style.cursor = pencilCursor 
-    }
-    else {
-        pencilToolCont.style.display = "none";
-    }
-})
-
-// function to handle show/hide for pencil and eraser options on eraser click
-eraser.addEventListener('click', () => {
-    eraserFlag = !eraserFlag
-    if (eraserFlag) {
-        eraserToolCont.style.display = 'flex'
-        pencilToolCont.style.display = "none";
-        eraser.style.backgound = "gold";
-    } else {
-        eraserToolCont.style.display = 'none'
-    }
-})

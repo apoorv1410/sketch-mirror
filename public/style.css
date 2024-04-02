@@ -76,6 +76,7 @@ img {
     background-color: #f1f2f6;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
     border-radius: 50%;
+    cursor: pointer;
 }
 
 .pencil-tool-cont {
