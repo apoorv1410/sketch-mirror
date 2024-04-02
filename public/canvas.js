@@ -1,4 +1,5 @@
-let socket = io.connect("https://sketch-mirror.vercel.app");
+// import app_url from '../config/config.js'
+let socket = io.connect(app_url);
 
 let canvas = document.querySelector("canvas");
 // set canvas size as full window
