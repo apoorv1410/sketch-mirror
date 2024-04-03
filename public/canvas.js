@@ -29,9 +29,15 @@ const drawingApp = {
     },
 
     setupEventListeners: function() {
+        // add mouse click event listeners for desktop devices
         this.canvas.addEventListener("mousedown", this.handleMouseDown.bind(this));
         this.canvas.addEventListener("mousemove", this.handleMouseMove.bind(this));
         this.canvas.addEventListener("mouseup", this.handleMouseUp.bind(this));
+
+        // add touch event listeners for mobile devices
+        this.canvas.addEventListener("touchstart", this.handleMouseDown.bind(this));
+        this.canvas.addEventListener("touchmove", this.handleMouseMove.bind(this));
+        this.canvas.addEventListener("touchend", this.handleMouseUp.bind(this));
         document.querySelector(".undo").addEventListener("click", this.handleUndo.bind(this));
         document.querySelector(".redo").addEventListener("click", this.handleRedo.bind(this));
         document.querySelector(".download").addEventListener("click", this.handleDownload.bind(this));
@@ -121,23 +127,27 @@ const drawingApp = {
         });
     },
 
+    // desktop click events have e.clientX and e.clientX co-ordinates
+    // mobile touch events have e.touches[0].clientX and e.touches[0].clientX co-ordinates
     handleMouseDown: function(e) {
         this.mouseDown = true;
         var data = {
             sender: this.socket.id,
-            x: e.clientX,
-            y: e.clientY
+            x: e.clientX || e.touches[0].clientX,
+            y: e.clientY || e.touches[0].clientY
         };
         this.beginPath(data);
         this.socket.emit("beginPath", data);
     },
 
+    // desktop click events have e.clientX and e.clientX co-ordinates
+    // mobile touch events have e.touches[0].clientX and e.touches[0].clientX co-ordinates
     handleMouseMove: function(e) {
         if (this.mouseDown) {
             var data = {
                 sender: this.socket.id,
-                x: e.clientX,
-                y: e.clientY,
+                x: e.clientX || e.touches[0].clientX,
+                y: e.clientY || e.touches[0].clientY,
                 color: eraserFlag ? this.eraserColor : this.penColor,
                 width: eraserFlag ? this.eraserWidth : this.penWidth
             };
