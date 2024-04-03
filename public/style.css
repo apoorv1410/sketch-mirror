@@ -34,6 +34,8 @@ body {
     border-radius: 50%;
     font-size: 1.5rem;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    cursor: pointer;
+    margin-top: 2rem;
 }
 
 img {
@@ -60,6 +62,7 @@ img {
     left: 25vw;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
     cursor: pointer;
+    margin-top: 2rem;
 }
 
 @media screen and (min-width: 768px) {
@@ -220,4 +223,10 @@ img {
 
 canvas {
     background-color: #fff;
+    /* min-height: 90vh; */
+}
+
+footer {
+    position: absolute;
+    bottom: 0.2rem;
 }
