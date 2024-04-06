@@ -2,8 +2,8 @@ let pencil = document.querySelector(".pencil");
 let eraser = document.querySelector(".eraser");
 let pencilToolCont = document.querySelector('.pencil-tool-cont')
 let eraserToolCont = document.querySelector('.eraser-tool-cont')
-let pencilFlag = false
-let eraserFlag = false
+let pencilFlag = true
+let soundFlag = false;
 const drawingApp = {
     socket: io.connect(app_url),
     canvas: document.querySelector("canvas"),
@@ -19,6 +19,7 @@ const drawingApp = {
     undoLimit: 1000,
     pencilWidthElem: document.querySelector(".pencil-width"),
     eraserWidthElem: document.querySelector(".eraser-width"),
+    soundElement: document.querySelector(".sound"),
     pencilCursor: "url('https://img.icons8.com/stickers/28/pencil-tip.png') -28 28, auto",
     eraserCursor: "url('https://img.icons8.com/papercut/28/eraser.png') -28 28, auto",
     mobilePointerScale: 2,
@@ -28,6 +29,9 @@ const drawingApp = {
         x: 0,
         y: 0
     },
+    pencilSound: document.getElementById('pencilSound'),
+    eraserSound: document.getElementById('eraserSound'),
+    mouseMoveTimer: {},
 
     init: function() {
         if (window.innerWidth > 720) {
@@ -69,6 +73,7 @@ const drawingApp = {
         this.canvas.addEventListener("touchend", this.handleMouseUp.bind(this));
         document.querySelector(".undo").addEventListener("click", this.handleUndo.bind(this));
         document.querySelector(".redo").addEventListener("click", this.handleRedo.bind(this));
+        this.soundElement.addEventListener("click", this.handleSoundFlag.bind(this));
         document.querySelector(".download").addEventListener("click", this.handleDownload.bind(this));
         let pencilColorTiles = document.querySelectorAll(".pencil-color-tile");
         pencilColorTiles.forEach((colorElem) => {
@@ -94,38 +99,23 @@ const drawingApp = {
         });
         
         eraser.addEventListener("click", () => {
-            eraserFlag = !eraserFlag
-            if (eraserFlag) {
-                this.tool.strokeStyle = this.eraserColor;
-                this.tool.lineWidth = this.eraserWidth;
-                this.canvas.style.cursor = this.eraserCursor;
+            pencilFlag = false
+            this.tool.strokeStyle = this.eraserColor;
+            this.tool.lineWidth = this.eraserWidth;
+            this.canvas.style.cursor = this.eraserCursor;
 
-                // update eraser tool style
-                eraserToolCont.style.display = 'flex'
-                pencilToolCont.style.display = "none";
-                eraser.style.backgound = "gold";
-            } else {
-                this.tool.strokeStyle = this.penColor;
-                this.tool.lineWidth = this.penWidth;
-                this.canvas.style.cursor = this.pencilCursor;
-                eraserToolCont.style.display = 'none'
-            }
+            // update eraser tool style
+            eraserToolCont.style.display = 'flex'
+            pencilToolCont.style.display = "none";
         });
 
         // function to handle show/hide for pencil and eraser options on pencil click
         pencil.addEventListener('click', () => {
-            pencilFlag = !pencilFlag
-            if (pencilFlag) {
-                pencilToolCont.style.display = "block";
-                pencil.style.backgound = "gold";
-                eraserToolCont.style.display = 'none'
-                eraserFlag = false
-                // set pencil cursor
-                this.canvas.style.cursor = this.pencilCursor 
-            }
-            else {
-                pencilToolCont.style.display = "none";
-            }
+            pencilFlag = true
+            pencilToolCont.style.display = "block";
+            eraserToolCont.style.display = 'none'
+            // set pencil cursor
+            this.canvas.style.cursor = this.pencilCursor 
         })
     },
 
@@ -192,10 +182,14 @@ const drawingApp = {
                 sender: this.socket.id,
                 x: e.clientX - this.canvasPos.x || e.touches[0].clientX - this.canvasPos.x,
                 y: e.clientY - this.canvasPos.y || e.touches[0].clientY - this.canvasPos.y,
-                color: eraserFlag ? this.eraserColor : this.penColor,
-                width: eraserFlag ? this.eraserWidth : this.penWidth
+                color: pencilFlag ? this.penColor : this.eraserColor,
+                width: pencilFlag ? this.penWidth : this.eraserWidth
             };
             this.drawStroke(data);
+            // play the sound if soundFlag is on
+            if (soundFlag) {
+                this.playSound()
+            }
             // scale up the pointer location to desktop
             if (window.innerWidth < 720) {
                 data.x = data.x * this.mobilePointerScale
@@ -205,8 +199,34 @@ const drawingApp = {
         }
     },
 
+    playSound: function() {
+        // play the pencil sound if pencil is in use
+        if (pencilFlag) {
+            this.pencilSound.volume = 1
+            this.pencilSound.play();
+        } else {
+            // else play the eraser sound
+            this.eraserSound.volume = 1
+            this.eraserSound.play();
+        }
+        // start timer to detect mouse stop event
+        clearTimeout(this.mouseMoveTimer);
+        this.mouseMoveTimer = setTimeout(this.pauseSound, 200);
+    },
+
+    pauseSound: function() {
+        // pause the active sound
+        if (pencilFlag) {
+            this.pencilSound.pause();
+        } else {
+            this.eraserSound.pause();
+        }
+    },
+
+
     handleMouseUp: function() {
         this.mouseDown = false;
+        this.pauseSound();
         this.undoRedoTracker = this.undoRedoTracker.slice(0, this.track + 1);
         let destinationCanvas = this.getCanvasCopyWithWhiteBackground();
         let url = destinationCanvas.toDataURL();
@@ -260,6 +280,17 @@ const drawingApp = {
                 source: this.undoRedoTracker[this.track]
             };
             this.socket.emit("redoUndo", updatedData);
+        }
+    },
+
+    handleSoundFlag: function () {
+        soundFlag = !soundFlag
+        // show the mute icon if sound is on
+        if (soundFlag) {
+            this.soundElement.src = 'icons/mute.png'
+        } else {
+            // show the sound icon otherwise
+            this.soundElement.src = 'icons/sound.png'
         }
     },
 
