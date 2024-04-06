@@ -6,7 +6,9 @@ body {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    cursor: none;
+    cursor: default;
+    width: 100vw;
+    height: 100vh;
 }
 
 .display-flex {
@@ -25,7 +27,6 @@ body {
     max-height: 3.5rem;
     max-width: 3.5rem;
     background-color: #f1f2f6;
-    position: absolute;
     top: 2rem;
     left: 1rem;
     display: flex;
@@ -57,7 +58,6 @@ img {
     width: 60vw;
     max-width: 30rem;
     background-color: #f1f2f6;
-    position: absolute;
     top: 2rem;
     left: 25vw;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
@@ -223,7 +223,14 @@ img {
 
 canvas {
     background-color: #fff;
-    /* min-height: 90vh; */
+    margin-top: 6rem;
+    border: 2px #000000 solid;
+    image-rendering: pixelated;
+}
+
+header, main {
+    display: flex;
+    justify-content: center;
 }
 
 footer {

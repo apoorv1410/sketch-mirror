@@ -1,3 +1,9 @@
+let pencil = document.querySelector(".pencil");
+let eraser = document.querySelector(".eraser");
+let pencilToolCont = document.querySelector('.pencil-tool-cont')
+let eraserToolCont = document.querySelector('.eraser-tool-cont')
+let pencilFlag = false
+let eraserFlag = false
 const drawingApp = {
     socket: io.connect(app_url),
     canvas: document.querySelector("canvas"),
@@ -5,7 +11,7 @@ const drawingApp = {
     mouseDown: false,
     penColor: "black",
     previousPenColor: "black",
-    penWidth: 2,
+    penWidth: 4,
     eraserWidth: 5,
     eraserColor: "white",
     undoRedoTracker: [],
@@ -15,18 +21,41 @@ const drawingApp = {
     eraserWidthElem: document.querySelector(".eraser-width"),
     pencilCursor: "url('https://img.icons8.com/stickers/28/pencil-tip.png') -28 28, auto",
     eraserCursor: "url('https://img.icons8.com/papercut/28/eraser.png') -28 28, auto",
+    mobilePointerScale: 2,
+    canvasWidth: 720,
+    canvasHeight: 400,
+    canvasPos: {
+        x: 0,
+        y: 0
+    },
 
     init: function() {
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
+        if (window.innerWidth > 720) {
+            this.canvas.width = this.canvasWidth;
+            this.canvas.height = this.canvasHeight;
+        } else {
+            this.canvas.width = this.canvasWidth / this.mobilePointerScale;
+            this.canvas.height = this.canvasHeight / this.mobilePointerScale;
+        }
         this.tool = this.canvas.getContext("2d");
         this.setupEventListeners();
         this.setupSocketListeners();
         this.setPencilCursor();
 
+        this.canvasPos = this.getPosition(this.canvas);
+
         // set initial color background
         this.updateBackgroundFromClass('.' + this.penColor + '-parent', 'white');
     },
+
+    getPosition: function(el) {
+        var xPosition = (el.offsetLeft - el.scrollLeft + el.clientLeft);
+        var yPosition = (el.offsetTop - el.scrollTop + el.clientTop);
+        return {
+          x: xPosition,
+          y: yPosition
+        };
+      },
 
     setupEventListeners: function() {
         // add mouse click event listeners for desktop devices
@@ -102,12 +131,22 @@ const drawingApp = {
 
     setupSocketListeners: function() {
         this.socket.on("beginPath", (data) => {
+            // scale down the pointer location to mobile
+            if (window.innerWidth <= 720) {
+                data.x = data.x / this.mobilePointerScale
+                data.y = data.y / this.mobilePointerScale
+            }
             // only trigger socket events from different socket
             if (this.socket.id != data.sender) {
                 this.beginPath(data);
             }
         });
         this.socket.on("drawStroke", (data) => {
+            // scale down the pointer location to mobile
+            if (window.innerWidth <= 720) {
+                data.x = data.x / this.mobilePointerScale
+                data.y = data.y / this.mobilePointerScale
+            }
             // only trigger socket events from different socket
             if (this.socket.id != data.sender) {
                 this.drawStroke(data);
@@ -133,10 +172,15 @@ const drawingApp = {
         this.mouseDown = true;
         var data = {
             sender: this.socket.id,
-            x: e.clientX || e.touches[0].clientX,
-            y: e.clientY || e.touches[0].clientY
+            x: e.clientX - this.canvasPos.x || e.touches[0].clientX - this.canvasPos.x,
+            y: e.clientY - this.canvasPos.y || e.touches[0].clientY - this.canvasPos.y
         };
         this.beginPath(data);
+        // scale up the pointer location to desktop
+        if (window.innerWidth < 720) {
+            data.x = data.x * this.mobilePointerScale
+            data.y = data.y * this.mobilePointerScale
+        }
         this.socket.emit("beginPath", data);
     },
 
@@ -146,12 +190,17 @@ const drawingApp = {
         if (this.mouseDown) {
             var data = {
                 sender: this.socket.id,
-                x: e.clientX || e.touches[0].clientX,
-                y: e.clientY || e.touches[0].clientY,
+                x: e.clientX - this.canvasPos.x || e.touches[0].clientX - this.canvasPos.x,
+                y: e.clientY - this.canvasPos.y || e.touches[0].clientY - this.canvasPos.y,
                 color: eraserFlag ? this.eraserColor : this.penColor,
                 width: eraserFlag ? this.eraserWidth : this.penWidth
             };
             this.drawStroke(data);
+            // scale up the pointer location to desktop
+            if (window.innerWidth < 720) {
+                data.x = data.x * this.mobilePointerScale
+                data.y = data.y * this.mobilePointerScale
+            }
             this.socket.emit("drawStroke", data);
         }
     },
