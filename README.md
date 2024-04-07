@@ -7,6 +7,7 @@ This project is a simple web application built using HTML, CSS, and JavaScript, 
 - Real-time drawing collaboration: Multiple users can draw on the canvas simultaneously, and their changes are instantly reflected for all other users.
 - Simple and intuitive user interface: The interface is designed to be minimalistic, user-friendly and easy to understand, allowing users to start drawing without any learning curve.
 - Responsive design: The application is optimized for various screen sizes, making it accessible on both desktop and mobile devices.
+- Audio interactivity: Added pencial and eraser sound toggles for enhanced drawing UX
 
 ## Setup
 
@@ -30,13 +31,18 @@ To set up the project locally, follow these steps:
    npm install
    ```
 
-4. Run the server:
+4. Add the port config file:
+   ```
+   cd public && echo -e "let app_url = 'http://localhost:5500;" > config.js
+   ```
+
+5. Run the server:
 
    ```
-   node app.js
+   npm start
    ```
 
-5. Open your web browser and navigate to `http://localhost:5000`.
+6. Open your browser and navigate to `http://localhost:5500`.
 
 ## Dependencies
 
