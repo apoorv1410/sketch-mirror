@@ -27,9 +27,9 @@ img {
     object-fit: contain;
 }
 
-.tools-cont > *, .download {
+.tools-cont > *, .download, .share {
     display: block;
-    max-width: 4rem;
+    max-width: 3rem;
     width: 10vw;
     cursor: pointer;
 }
@@ -54,7 +54,7 @@ img {
     }
 }
 
-.download-button {
+.download-button, .share-button {
     position: absolute;
     bottom: 2rem;
     right: 2rem;
@@ -63,6 +63,10 @@ img {
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
     border-radius: 50%;
     cursor: pointer;
+}
+
+.share-button {
+    bottom: 8rem;
 }
 
 .pencil-tool-cont {

@@ -78,6 +78,7 @@ const drawingApp = {
         document.querySelector(".redo").addEventListener("click", this.handleRedo.bind(this));
         this.soundElement.addEventListener("click", this.handleSoundFlag.bind(this));
         document.querySelector(".download").addEventListener("click", this.handleDownload.bind(this));
+        document.querySelector(".share").addEventListener("click", this.handleShare.bind(this));
         let pencilColorTiles = document.querySelectorAll(".pencil-color-tile");
         pencilColorTiles.forEach((colorElem) => {
             colorElem.addEventListener("click", () => {
@@ -305,6 +306,23 @@ const drawingApp = {
         } else {
             // show the sound icon otherwise
             this.soundElement.src = 'assets/icons/sound.png'
+        }
+    },
+
+    handleShare: async function() {
+        let canvasScreenShotWithWhiteBackground = this.getCanvasCopyWithWhiteBackground();
+        let url = canvasScreenShotWithWhiteBackground.toDataURL();
+        const blob = await (await fetch(url)).blob();
+        const fileName = "board-" + new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString() + ".jpg";
+        const filesArray = [new File([blob], fileName, { type: blob.type, lastModified: new Date().getTime() })];
+        const shareData = {
+            title: 'My Sketch',
+            text: 'Check this art out!',
+            files: filesArray,
+        };
+        console.log('sharing this: ', shareData)
+        if (navigator.share) {
+            navigator.share(shareData)
         }
     },
 
