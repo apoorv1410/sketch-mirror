@@ -5,9 +5,15 @@
     "icons": [
         {
             "src": "./assets/icons/pencil.png",
-            "sizes": "512x512 192x192 144x144",
+            "sizes": "512x512 256x256 192x192",
             "type": "image/png",
-            "purpose": "any maskable"
+            "purpose": "maskable"
+        },
+        {
+            "src": "./assets/icons/pencil-144x144.png",
+            "sizes": "144x144",
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "./assets/icons/pencil-64x64.png",
@@ -17,19 +23,13 @@
         },
         {
             "src": "./assets/icons/pencil-32x32.png",
-            "sizes": "32x32",
+            "sizes": "48x48 32x32",
             "type": "image/png",
             "purpose": "maskable"
         },
         {
             "src": "./assets/icons/pencil-24x24.png",
             "sizes": "24x24",
-            "type": "image/png",
-            "purpose": "maskable"
-        },
-        {
-            "src": "./assets/icons/pencil-16x16.png",
-            "sizes": "16x16",
             "type": "image/png",
             "purpose": "maskable"
         }
