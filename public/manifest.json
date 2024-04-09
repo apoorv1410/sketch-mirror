@@ -1,0 +1,35 @@
+{
+    "name": "SketchMirror",
+    "version": "1.0.1",
+    "short_name": "SketchMirror",
+    "icons": [
+        {
+            "src": "./assets/icons/pencil.png",
+            "sizes": "512x512 192x192 144x144 64x64 32x32 24x24 16x16",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "screenshots": [
+        {
+         "src": "./assets/sketch-mirror-ss-1.png",
+          "sizes": "1919x1122",
+          "type": "image/png",
+          "form_factor": "wide",
+          "label": "SketchMirror Screenshot"
+        },
+        {
+         "src": "./assets/sketch-mirror-ss-1.png",
+          "sizes": "1919x1122",
+          "type": "image/png",
+          "label": "SketchMirror Screenshot"
+        }
+    ],
+    "description": "Collaborative drawing tool for creating and sharing sketches with friends in real-time.",
+    "theme_color": "#ffffff",
+    "lang": "en",
+    "background_color": "#ffffff",
+    "display": "standalone",
+    "start_url": "/?utm_source=pwa&utm_medium=pwa_railway"
+  }
+  

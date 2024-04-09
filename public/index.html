@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Sketch Mirror - Collaborative drawing tool for creating and sharing sketches with friends in real-time.">
+    <meta name="theme-color" content="#ffffff">
     <link rel="stylesheet" href="style.css">
     <link rel="icon" type="image/x-icon" href="./assets/fevicon.ico">
+    <link rel="manifest" href="manifest.json">
     <title>Sketch Mirror</title>
 </head>
 <body>
@@ -61,10 +63,14 @@
         <img class="download" src="assets/icons/download.svg" alt="download">
     </div>
     <main>
-        <canvas width="720" height="400" aria-label="Sketch canvas" role="img"></canvas>
+        <canvas id="canvas-mobile" width="360" height="200" aria-label="Sketch canvas" role="img"></canvas>
+        <canvas id="canvas-desktop" width="720" height="400" aria-label="Sketch canvas" role="img"></canvas>
         <audio id="pencilSound" src="./assets/pencil_1.wav"></audio>
         <audio id="eraserSound" src="./assets/eraser-1.wav"></audio>
     </main>
+    <footer>
+        icons by flaticon
+    </footer>
     <script defer src="https://cdn.socket.io/4.2.0/socket.io.min.js" integrity="sha384-PiBR5S00EtOj2Lto9Uu81cmoyZqR57XcOna1oAuVuIEjzj0wpqDVfD0JA9eXlRsj" crossorigin="anonymous"></script>
     <script defer type="text/javascript" src="./config.js"></script>
     <script defer src="./canvas.js"></script>

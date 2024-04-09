@@ -6,7 +6,7 @@ let pencilFlag = true
 let soundFlag = false;
 const drawingApp = {
     socket: io.connect(app_url),
-    canvas: document.querySelector("canvas"),
+    canvas: window.innerWidth > 720 ? document.querySelector("#canvas-desktop") : document.querySelector("#canvas-mobile"),
     tool: null,
     mouseDown: false,
     penColor: "black",

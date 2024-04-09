@@ -65,6 +65,7 @@ Contributions are welcome! If you have any ideas, suggestions, or improvements, 
 - socket.io library was used for real-time communication between clients and server.
 - HTML Canvas API was used for drawing on the web page.
 - navigator API was used for share/copy functionalities.
+- icons by [icons8](https://icons8.com/)
 
 ## Contact
 

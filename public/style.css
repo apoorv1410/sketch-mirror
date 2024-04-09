@@ -48,7 +48,22 @@ img {
     margin-top: 2rem;
 }
 
-@media screen and (min-width: 768px) {
+#canvas-mobile {
+    /* hide the mobile canvas by default */
+    display: none;
+}
+
+@media screen and (max-width: 720px) {
+    #canvas-mobile {
+        /* show the mobile canvas in mobile device */
+        display: block;
+    }
+    #canvas-desktop {
+        /* hide the mobile canvas in mobile device */
+        display: none;
+    }
+}
+@media screen and (min-width: 721px) {
     .tools-cont {
         left: 35vw;
     }
@@ -222,6 +237,7 @@ header, main {
 footer {
     position: absolute;
     bottom: 0.2rem;
+    margin: 0.5rem;
 }
 
 /* snackbar style starts */
