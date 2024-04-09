@@ -21,24 +21,6 @@ body {
     height: 70%;
 }
 
-.options-cont {
-    width: 10vw;
-    height: 10vw;
-    max-height: 3.5rem;
-    max-width: 3.5rem;
-    background-color: #f1f2f6;
-    top: 2rem;
-    left: 1rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 50%;
-    font-size: 1.5rem;
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-    cursor: pointer;
-    margin-top: 2rem;
-}
-
 img {
     display: block;
     height: 100%;
@@ -49,6 +31,7 @@ img {
     display: block;
     max-width: 4rem;
     width: 10vw;
+    cursor: pointer;
 }
 
 .tools-cont {
@@ -61,7 +44,7 @@ img {
     top: 2rem;
     left: 25vw;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-    cursor: pointer;
+    cursor: default;
     margin-top: 2rem;
 }
 
@@ -103,7 +86,6 @@ img {
 
 .pencil-width-cont input {
     width: 80%;
-    /* max-width: 10rem; */
 }
 
 .pencil-color-cont {

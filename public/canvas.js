@@ -66,6 +66,9 @@ const drawingApp = {
         this.canvas.addEventListener("mousedown", this.handleMouseDown.bind(this));
         this.canvas.addEventListener("mousemove", this.handleMouseMove.bind(this));
         this.canvas.addEventListener("mouseup", this.handleMouseUp.bind(this));
+        // handle the pointed leaving the canvas same as mouse up to ...
+        // ... finish the stroke if is active
+        this.canvas.addEventListener("mouseout", this.handleMouseUp.bind(this));
 
         // add touch event listeners for mobile devices
         this.canvas.addEventListener("touchstart", this.handleMouseDown.bind(this));
@@ -160,6 +163,8 @@ const drawingApp = {
     // mobile touch events have e.touches[0].clientX and e.touches[0].clientX co-ordinates
     handleMouseDown: function(e) {
         this.mouseDown = true;
+        // restart the audio from beginning
+        this.resetSoundTime()
         var data = {
             sender: this.socket.id,
             x: e.clientX - this.canvasPos.x || e.touches[0].clientX - this.canvasPos.x,
@@ -199,16 +204,25 @@ const drawingApp = {
         }
     },
 
-    playSound: function() {
-        // play the pencil sound if pencil is in use
+    getActiveSound: function() {
         if (pencilFlag) {
-            this.pencilSound.volume = 1
-            this.pencilSound.play();
+            return this.pencilSound
         } else {
-            // else play the eraser sound
-            this.eraserSound.volume = 1
-            this.eraserSound.play();
+            return this.eraserSound
         }
+    },
+
+    // resetting the active sound time to 0
+    resetSoundTime: function() {
+        const activeSound = this.getActiveSound()
+        activeSound.currentTime = 0
+    },
+
+    playSound: function() {
+        // play the active sound
+        const activeSound = this.getActiveSound()
+        activeSound.volume = 1
+        activeSound.play();
         // start timer to detect mouse stop event
         clearTimeout(this.mouseMoveTimer);
         this.mouseMoveTimer = setTimeout(this.pauseSound, 200);
@@ -287,10 +301,10 @@ const drawingApp = {
         soundFlag = !soundFlag
         // show the mute icon if sound is on
         if (soundFlag) {
-            this.soundElement.src = 'icons/mute.png'
+            this.soundElement.src = 'assets/icons/mute.png'
         } else {
             // show the sound icon otherwise
-            this.soundElement.src = 'icons/sound.png'
+            this.soundElement.src = 'assets/icons/sound.png'
         }
     },
 
