@@ -32,6 +32,9 @@ const drawingApp = {
     pencilSound: document.getElementById('pencilSound'),
     eraserSound: document.getElementById('eraserSound'),
     mouseMoveTimer: {},
+    shareTitle: 'Share Sketch',
+    shareText: 'Check this art out!',
+    snackbarTimeout: 3000,
 
     init: function() {
         if (window.innerWidth > 720) {
@@ -302,13 +305,14 @@ const drawingApp = {
         soundFlag = !soundFlag
         // show the mute icon if sound is on
         if (soundFlag) {
-            this.soundElement.src = 'assets/icons/mute.png'
+            this.soundElement.src = 'assets/icons/mute.svg'
         } else {
             // show the sound icon otherwise
-            this.soundElement.src = 'assets/icons/sound.png'
+            this.soundElement.src = 'assets/icons/sound.svg'
         }
     },
 
+    // share/copy the canvas
     handleShare: async function() {
         let canvasScreenShotWithWhiteBackground = this.getCanvasCopyWithWhiteBackground();
         let url = canvasScreenShotWithWhiteBackground.toDataURL();
@@ -316,14 +320,30 @@ const drawingApp = {
         const fileName = "board-" + new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString() + ".jpg";
         const filesArray = [new File([blob], fileName, { type: blob.type, lastModified: new Date().getTime() })];
         const shareData = {
-            title: 'My Sketch',
-            text: 'Check this art out!',
+            title: this.shareTitle,
+            text: this.shareText,
             files: filesArray,
         };
-        console.log('sharing this: ', shareData)
         if (navigator.share) {
+            // use 'share' api if supported (for mobile devices)
             navigator.share(shareData)
+        } else {
+            // else use 'copy' api (for desktop devices)
+            const item = new ClipboardItem({ "image/png": blob });
+            navigator.clipboard.write([item]);
+            // show 'Copied!' text snackbar
+            this.showSnackbar()
         }
+    },
+
+    // update snackbar visibility
+    showSnackbar: function() {
+        const x = document.getElementById("snackbar");
+        x.className = "show";
+        // automatically hide nackbar after timeout
+        setTimeout(function() {
+            x.className = x.className.replace("show", "");
+        }, this.snackbarTimeout);
     },
 
     handleDownload: function() {

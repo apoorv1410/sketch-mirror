@@ -8,6 +8,7 @@ This project is a simple web application built using HTML, CSS, and JavaScript, 
 - Simple and intuitive user interface: The interface is designed to be minimalistic, user-friendly and easy to understand, allowing users to start drawing without any learning curve.
 - Responsive design: The application is optimized for various screen sizes, making it accessible on both desktop and mobile devices.
 - Audio interactivity: Added pencial and eraser sound toggles for enhanced drawing UX
+- Share/Copy feature: Added 'navigaator' API support to easily share your art with others
 
 ## Setup
 
@@ -63,6 +64,7 @@ Contributions are welcome! If you have any ideas, suggestions, or improvements, 
 - This project was inspired by the need for real-time collaboration tools.
 - socket.io library was used for real-time communication between clients and server.
 - HTML Canvas API was used for drawing on the web page.
+- navigator API was used for share/copy functionalities.
 
 ## Contact
 
