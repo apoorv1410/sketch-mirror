@@ -54,6 +54,7 @@ To set up the project locally, follow these steps:
 - Once the server is running, open the application in your web browser.
 - Start drawing on the canvas. Your changes will be instantly synced with other users who are also accessing the application on same port.
 - To collaborate with others, share the URL of the application with them.
+- Live [Demo](https://sketch-mirror-production.up.railway.app/)
 
 ## Contributing
 
@@ -65,7 +66,7 @@ Contributions are welcome! If you have any ideas, suggestions, or improvements, 
 - socket.io library was used for real-time communication between clients and server.
 - HTML Canvas API was used for drawing on the web page.
 - navigator API was used for share/copy functionalities.
-- icons by [icons8](https://icons8.com/)
+- icons by [flaticon](https://www.flaticon.com/)
 
 ## Contact
 

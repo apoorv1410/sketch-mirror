@@ -20,8 +20,8 @@ const drawingApp = {
     pencilWidthElem: document.querySelector(".pencil-width"),
     eraserWidthElem: document.querySelector(".eraser-width"),
     soundElement: document.querySelector(".sound"),
-    pencilCursor: "url('https://img.icons8.com/stickers/28/pencil-tip.png') -28 28, auto",
-    eraserCursor: "url('https://img.icons8.com/papercut/28/eraser.png') -28 28, auto",
+    pencilCursor: "url('./assets/icons/pencil-24x24.png') -28 28, auto",
+    eraserCursor: "url('./assets/icons/eraser-24x24.png') -28 28, auto",
     mobilePointerScale: 2,
     canvasWidth: 720,
     canvasHeight: 400,
@@ -71,7 +71,7 @@ const drawingApp = {
         this.canvas.addEventListener("mouseup", this.handleMouseUp.bind(this));
         // handle the pointed leaving the canvas same as mouse up to ...
         // ... finish the stroke if is active
-        this.canvas.addEventListener("mouseout", this.handleMouseUp.bind(this));
+        this.canvas.addEventListener("mouseout", this.handleMouseOut.bind(this));
 
         // add touch event listeners for mobile devices
         this.canvas.addEventListener("touchstart", this.handleMouseDown.bind(this));
@@ -241,6 +241,11 @@ const drawingApp = {
         }
     },
 
+    // stop the drawing when user moves out of the canvas area
+    handleMouseOut: function() {
+        this.mouseDown = false;
+        this.pauseSound();
+    },
 
     handleMouseUp: function() {
         this.mouseDown = false;

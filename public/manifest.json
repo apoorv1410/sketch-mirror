@@ -1,28 +1,53 @@
 {
-    "name": "SketchMirror",
+    "name": "LeakyInk",
     "version": "1.0.1",
-    "short_name": "SketchMirror",
+    "short_name": "LeakyInk",
     "icons": [
         {
             "src": "./assets/icons/pencil.png",
-            "sizes": "512x512 192x192 144x144 64x64 32x32 24x24 16x16",
+            "sizes": "512x512 192x192 144x144",
             "type": "image/png",
             "purpose": "any maskable"
+        },
+        {
+            "src": "./assets/icons/pencil-64x64.png",
+            "sizes": "64x64",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "./assets/icons/pencil-32x32.png",
+            "sizes": "32x32",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "./assets/icons/pencil-24x24.png",
+            "sizes": "24x24",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "./assets/icons/pencil-16x16.png",
+            "sizes": "16x16",
+            "type": "image/png",
+            "purpose": "maskable"
         }
     ],
     "screenshots": [
         {
-         "src": "./assets/sketch-mirror-ss-1.png",
-          "sizes": "1919x1122",
+         "src": "./assets/sketch-mirror-ss-desktop.png",
+          "sizes": "1916x1004",
           "type": "image/png",
           "form_factor": "wide",
-          "label": "SketchMirror Screenshot"
+          "label": "LeakyInk Screenshot"
         },
         {
-         "src": "./assets/sketch-mirror-ss-1.png",
-          "sizes": "1919x1122",
+         "src": "./assets/sketch-mirror-ss-mobile.png",
+          "sizes": "446x898",
           "type": "image/png",
-          "label": "SketchMirror Screenshot"
+          "form_factor": "narrow",
+          "label": "LeakyInk Screenshot"
         }
     ],
     "description": "Collaborative drawing tool for creating and sharing sketches with friends in real-time.",
